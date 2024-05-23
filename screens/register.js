@@ -1,0 +1,302 @@
+import { MaterialIcons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
+import ImagePickerComponent from "../components/image_picker";
+import { COLORS, FONTS, SIZES } from "../constants";
+
+export default function Register({ navigation }) {
+  const [isUserNameFocused, setIsUserNameFocused] = useState(false);
+  const [isFullNameFocused, setIsFullNameFocused] = useState(false);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [avatar, setAvatar] = useState(null);
+  const [textFullName, setTextFullName] = useState("");
+  const [textEmail, setTextEmail] = useState("");
+  const [textPhone, setPhone] = useState("");
+  const [textUserName, setTextUserName] = useState("");
+  const [FullNameError, setFullNameError] = useState("");
+  const [EmailError, setEmailError] = useState("");
+  const [PhoneError, setPhoneError] = useState("");
+  const [UserNameError, setUserNameError] = useState("");
+  const [avatarError, setAvatarError] = useState("");
+
+  const handleFullNameFocus = () => setIsFullNameFocused(true);
+  const handleFullNameBlur = () => setIsFullNameFocused(false);
+
+  const handleEmailFocus = () => setIsEmailFocused(true);
+  const handleEmailBlur = () => setIsEmailFocused(false);
+
+  const handleUserNameFocus = () => setIsUserNameFocused(true);
+  const handleUserNameBlur = () => setIsUserNameFocused(false);
+
+  const handleImageSelect = (imageUri) => {
+    setAvatar(imageUri); // Cập nhật đường dẫn của hình ảnh được chọn
+  };
+
+  const validateAvatar = () => {
+    if (avatar === null) {
+      setAvatarError("Vui lòng chọn ảnh đại diện.");
+      return false;
+    }
+    setAvatarError("");
+    return true;
+  };
+  const validateFullName = () => {
+    if (textFullName.length < 3 || textFullName.length > 32) {
+      setFullNameError("Họ và tên phải từ 3 đến 32 ký tự.");
+      return false;
+    }
+    // Kiểm tra ký tự đặc biệt
+    // const regex = /^[a-zA-Z0-9 ]*$/;\
+    const regex = /^[a-zA-Z ]*$/;
+    if (!regex.test(textFullName)) {
+      setFullNameError("Họ và tên không được chứa ký tự đặc biệt và số.");
+      return false;
+    }
+    setFullNameError("");
+    return true;
+  };
+
+  const validateEmail = () => {
+    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    if (!regex.test(textEmail)) {
+      setEmailError("Email phải có định dạng xxx@gmail.com.");
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
+
+  const validateUserName = () => {
+    if (textUserName.length < 2 || textUserName.length > 32) {
+      setUserNameError("Tài khoản của bạn phải từ 2 đến 32.");
+      return false;
+    }
+    setUserNameError("");
+    return true;
+  };
+  const validatePhone = () => {
+    //số điện thoại phải có 10 số và bắt đầu từ 0
+    const regex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+    if (!regex.test(textPhone)) {
+      setPhoneError(
+        "Số điện thoại phải có 10 số và bắt đầu từ 03, 05, 07, 08, 09."
+      );
+      return false;
+    }
+    setPhoneError("");
+    return true;
+  };
+
+  const handleRegister = () => {
+    if (
+      !validateAvatar() ||
+      !validateFullName() ||
+      !validateUserName() ||
+      !validateEmail() ||
+      !validatePhone()
+    ) {
+      return;
+    }
+    console.log("avatar: ", avatar);
+    console.log("Họ và tên: ", textFullName);
+    console.log("Tài khoản của bạn: ", textUserName);
+    navigation.navigate("RegisterPassword", {
+      avatar,
+      fullName: textFullName,
+      userName: textUserName,
+      email: textEmail,
+      phone: textPhone,
+    });
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: COLORS.white }}>
+      <View
+        style={{
+          marginHorizontal: SIZES.marginHorizontal,
+          marginTop: 10,
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+      >
+        <MaterialIcons
+          name="arrow-back"
+          size={SIZES.padding * 3}
+          color="black"
+          onPress={() => navigation.navigate("Start")}
+        />
+        <Text
+          style={{
+            marginLeft: "10%",
+            color: COLORS.blue,
+            ...FONTS.h2,
+            marginHorizontal: SIZES.marginHorizontal,
+            textAlign: "center",
+          }}
+        >
+          Đăng ký tài khoản
+        </Text>
+      </View>
+
+      {/*TODO: avatar */}
+      <ImagePickerComponent onImageSelect={handleImageSelect} />
+      {avatarError !== "" && (
+        <Text
+          style={{
+            textAlign: "center",
+            color: COLORS.red,
+            marginHorizontal: SIZES.marginHorizontal,
+          }}
+        >
+          {avatarError}
+        </Text>
+      )}
+      <TextInput
+        placeholder="Nhập họ và tên"
+        value={textFullName}
+        onChangeText={(text) => setTextFullName(text)}
+        placeholderTextColor={COLORS.gray1}
+        selectionColor={COLORS.blue}
+        keyboardType="default"
+        onFocus={handleFullNameFocus}
+        onBlur={handleFullNameBlur}
+        style={{
+          height: 48,
+          marginTop: 10,
+          backgroundColor: COLORS.secondaryWhite,
+          color: "#111",
+          borderColor: isFullNameFocused ? COLORS.blue : COLORS.gray1,
+          borderWidth: 1.5,
+          borderRadius: SIZES.padding,
+          paddingLeft: SIZES.padding,
+          ...FONTS.body3,
+          marginHorizontal: SIZES.marginHorizontal,
+        }}
+      />
+      {FullNameError !== "" && (
+        <Text
+          style={{
+            color: COLORS.red,
+            marginHorizontal: SIZES.marginHorizontal,
+          }}
+        >
+          {FullNameError}
+        </Text>
+      )}
+      <TextInput
+        placeholder="Nhập tên tài khoản (user name)"
+        value={textUserName}
+        onChangeText={(text) => setTextUserName(text)}
+        placeholderTextColor={COLORS.gray1}
+        selectionColor={COLORS.blue}
+        keyboardType="default" // hoặc "ascii-capable"
+        onFocus={handleUserNameFocus}
+        onBlur={handleUserNameBlur}
+        style={{
+          height: 48,
+          marginTop: 10,
+          backgroundColor: COLORS.secondaryWhite,
+          color: "#111",
+          borderColor: isUserNameFocused ? COLORS.blue : COLORS.gray1,
+          borderWidth: 1.5,
+          borderRadius: SIZES.padding,
+          paddingLeft: SIZES.padding,
+          ...FONTS.body3,
+          marginHorizontal: SIZES.marginHorizontal,
+        }}
+      />
+      {UserNameError !== "" && (
+        <Text
+          style={{
+            color: COLORS.red,
+            marginHorizontal: SIZES.marginHorizontal,
+          }}
+        >
+          {UserNameError}
+        </Text>
+      )}
+      {/* email */}
+
+      <TextInput
+        placeholder="Nhập email của bạn"
+        value={textEmail}
+        onChangeText={(text) => setTextEmail(text)}
+        placeholderTextColor={COLORS.gray1}
+        selectionColor={COLORS.blue}
+        keyboardType="email-address"
+        onFocus={handleEmailFocus}
+        onBlur={handleEmailBlur}
+        style={{
+          height: 48,
+          marginTop: 10,
+          backgroundColor: COLORS.secondaryWhite,
+          color: "#111",
+          borderColor: isEmailFocused ? COLORS.blue : COLORS.gray1,
+          borderWidth: 1.5,
+          borderRadius: SIZES.padding,
+          paddingLeft: SIZES.padding,
+          ...FONTS.body3,
+          marginHorizontal: SIZES.marginHorizontal,
+        }}
+      />
+      {EmailError !== "" && (
+        <Text
+          style={{
+            color: COLORS.red,
+            marginHorizontal: SIZES.marginHorizontal,
+          }}
+        >
+          {EmailError}
+        </Text>
+      )}
+      {/* số điện thoại */}
+
+      <TextInput
+        placeholder="Nhập số điện thoại của bạn"
+        value={textPhone}
+        onChangeText={(text) => setPhone(text)}
+        placeholderTextColor={COLORS.gray1}
+        selectionColor={COLORS.blue}
+        keyboardType="phone-pad"
+        style={{
+          height: 48,
+          marginTop: 10,
+          backgroundColor: COLORS.secondaryWhite,
+          color: "#111",
+          borderColor: COLORS.gray1,
+          borderWidth: 1.5,
+          borderRadius: SIZES.padding,
+          paddingLeft: SIZES.padding,
+          ...FONTS.body3,
+          marginHorizontal: SIZES.marginHorizontal,
+        }}
+      />
+      {PhoneError !== "" && (
+        <Text
+          style={{
+            color: COLORS.red,
+            marginHorizontal: SIZES.marginHorizontal,
+          }}
+        >
+          {PhoneError}
+        </Text>
+      )}
+      <Pressable
+        onPress={handleRegister}
+        style={{
+          marginTop: 20,
+          height: 48,
+          width: SIZES.width * 0.9,
+          marginHorizontal: SIZES.marginHorizontal,
+          backgroundColor: COLORS.blue,
+          justifyContent: "center",
+          alignItems: "center",
+          borderRadius: SIZES.padding,
+          alignSelf: "center",
+        }}
+      >
+        <Text style={{ color: COLORS.white, ...FONTS.h3 }}>Tiếp tục</Text>
+      </Pressable>
+    </View>
+  );
+}
