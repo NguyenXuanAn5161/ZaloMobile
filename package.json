@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/vector-icons": "^14.0.2",
     "@expo/webpack-config": "~19.0.1",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-navigation/bottom-tabs": "^6.5.17",
@@ -16,9 +17,8 @@
     "@react-navigation/native-stack": "^6.9.18",
     "@react-navigation/stack": "^6.3.21",
     "@reduxjs/toolkit": "^2.2.3",
-    "@types/react": "~18.2.79",
     "axios": "^1.6.7",
-    "expo": "51",
+    "expo": "~50.0.7",
     "expo-av": "~13.10.5",
     "expo-document-picker": "~11.10.1",
     "expo-file-system": "~16.0.8",
@@ -33,9 +33,7 @@
     "react-native-vector-icons": "^10.0.3",
     "react-native-web": "~0.19.6",
     "react-redux": "^9.1.1",
-    "socket.io-client": "^4.7.4",
-    "typescript": "~5.3.3",
-    "zustand": "^4.5.2"
+    "socket.io-client": "^4.7.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

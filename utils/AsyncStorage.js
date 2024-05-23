@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export const storeCurrentUser = async (currentUser) => {
   try {
     await AsyncStorage.setItem("currentUser", JSON.stringify(currentUser));
+    console.log("User data stored successfully.");
   } catch (error) {
     console.log("Error storing user data:", error);
   }
@@ -10,8 +11,7 @@ export const storeCurrentUser = async (currentUser) => {
 
 export const getUserCurrent = async () => {
   try {
-    const res = await AsyncStorage.getItem("currentUser");
-    return JSON.parse(res);
+    return await AsyncStorage.getItem("currentUser");
   } catch (error) {
     console.log("Error getting tokens:", error);
     return null;

@@ -24,7 +24,8 @@ export default function Contact({ navigation }) {
   const [isPressGroupChat, setIsPressGroupChat] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
-  const [confirmDeleteModalVisible, setConfirmDeleteModalVisible] = useState(false);
+  const [confirmDeleteModalVisible, setConfirmDeleteModalVisible] =
+    useState(false);
   const [friendToDelete, setFriendToDelete] = useState(null);
   const [friends, setFriends] = useState([]);
   const [filteredFriends, setFilteredFriends] = useState([]);
@@ -35,13 +36,13 @@ export default function Contact({ navigation }) {
     useCallback(() => {
       // Call your fetch function here
       fetchListFriend();
-    }, []),
+    }, [])
   );
 
   const fetchListFriend = async () => {
     try {
       setLoading(true);
-      const me = await getUserCurrent();
+      const me = JSON.parse(await getUserCurrent());
       console.log("me: ", me.id);
       const res = await FriendAPI.getListFriends(me.id);
       if (res?.data) {
@@ -94,12 +95,12 @@ export default function Contact({ navigation }) {
   useEffect(() => {
     // Lọc danh sách bạn bè dựa trên từ khóa tìm kiếm
     const filtered = friends.filter((friend) =>
-      friend.receiver.username.toLowerCase().includes(textSearch.toLowerCase()),
+      friend.receiver.username.toLowerCase().includes(textSearch.toLowerCase())
     );
 
     // Sắp xếp danh sách bạn bè theo tên
     const sortedFriends = filtered.sort((a, b) =>
-      a.receiver.username.localeCompare(b.receiver.username),
+      a.receiver.username.localeCompare(b.receiver.username)
     );
 
     // Nhóm bạn bè theo chữ cái đầu tiên của tên
@@ -149,7 +150,10 @@ export default function Contact({ navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : null} style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : null}
+      style={{ flex: 1 }}
+    >
       <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
         {/* TODO: Tìm kiếm */}
         <View
@@ -258,10 +262,14 @@ export default function Contact({ navigation }) {
                 }}
               >
                 <MaterialIcons name="person-add" size={35} color="blue" />
-                <Text style={{ ...FONTS.body4, marginLeft: 10 }}>Thêm bạn bè</Text>
+                <Text style={{ ...FONTS.body4, marginLeft: 10 }}>
+                  Thêm bạn bè
+                </Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("ListFriendsRequest")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("ListFriendsRequest")}
+            >
               <View
                 style={{
                   flexDirection: "row",
@@ -269,13 +277,17 @@ export default function Contact({ navigation }) {
                 }}
               >
                 <MaterialIcons name="person-search" size={35} color="blue" />
-                <Text style={{ ...FONTS.body4, marginLeft: 10 }}>Lời mời kết bạn</Text>
+                <Text style={{ ...FONTS.body4, marginLeft: 10 }}>
+                  Lời mời kết bạn
+                </Text>
               </View>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={{ alignItems: "center", height: 50 }}>
-            <TouchableOpacity onPress={() => navigation.navigate("CreateGroup")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("CreateGroup")}
+            >
               <View
                 style={{
                   flexDirection: "row",
@@ -391,7 +403,10 @@ export default function Contact({ navigation }) {
           }}
         >
           <View style={styles.centeredView}>
-            <TouchableOpacity style={styles.overlay} onPress={() => setModalVisible(false)} />
+            <TouchableOpacity
+              style={styles.overlay}
+              onPress={() => setModalVisible(false)}
+            />
             <View style={styles.modalView}>
               <View
                 style={{
@@ -424,7 +439,10 @@ export default function Contact({ navigation }) {
                   width: "80%",
                 }}
               />
-              <TouchableOpacity style={styles.button} onPress={handleProfilePress}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleProfilePress}
+              >
                 <Text
                   style={{
                     marginTop: 5,
@@ -444,7 +462,10 @@ export default function Contact({ navigation }) {
                   width: "80%",
                 }}
               />
-              <TouchableOpacity style={styles.button} onPress={showConfirmDeleteModal}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={showConfirmDeleteModal}
+              >
                 <Text
                   style={{
                     marginTop: 5,

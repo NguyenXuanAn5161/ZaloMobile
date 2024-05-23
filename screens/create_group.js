@@ -19,31 +19,14 @@ import { FriendAPI } from "../services/FriendApi";
 import { getUserCurrent } from "../utils/AsyncStorage";
 
 export default function CreateGroup({ navigation }) {
-  const currentUser = getUserCurrent();
-  const [selectedUsers, setSelectedUsers] = useState([]);
-  const [groupName, setGroupName] = useState("");
-  const [groupAvatar, setGroupAvatar] = useState(
-    "https://png.pngtree.com/png-vector/20190827/ourmid/pngtree-group-avatar-icon-design-vector-png-image_1702778.jpg",
-  );
+  const dispatch = useDispatch();
 
-  const handleUserSelect = (userId) => {
-    setSelectedUsers((prevSelectedUsers) => [...prevSelectedUsers, userId]);
-  };
-  const handleUserDeselect = (userId) => {
-    setSelectedUsers((prevSelectedUsers) => prevSelectedUsers.filter((id) => id !== userId));
-  };
-
-  const handleGroupNameChange = (event) => {
-    setGroupName(event.target.value);
-  };
-
-  const handleFriendSelect = (friendId) => {
-    const isSelected = selectedUsers.includes(friendId);
-    return isSelected ? handleUserDeselect(friendId) : handleUserSelect(friendId);
-  };
-
+  const [selectedFriends, setSelectedFriends] = useState([]);
+  const [image, setImage] = useState(null);
   const [textSearch, setSearch] = useState("");
+  const [nameGroup, setNameGroup] = useState("");
   const [showCreateGroupButton, setShowCreateGroupButton] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [friends, setFriends] = useState([]);
 
@@ -54,11 +37,15 @@ export default function CreateGroup({ navigation }) {
   //   }, [])
   // );
 
+  useEffect(() => {
+    if (!currentUser) return;
+    fetchListFriend();
+  }, [currentUser]);
+
   const fetchListFriend = async () => {
     try {
       setLoading(true);
-      const res = await FriendAPI.getListFriends(currentUser?.user?.id);
-
+      const res = await FriendAPI.getListFriends(currentUser.id);
       if (res?.data) {
         const data = res.data.map(({ id, receiver, sender, status }) => {
           if (currentUser.id === sender.id) {
@@ -81,41 +68,71 @@ export default function CreateGroup({ navigation }) {
   };
 
   useEffect(() => {
-    if (!currentUser) return;
-    fetchListFriend();
-  }, [currentUser]);
+    fetchCurrentUser();
+  }, []);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const me = JSON.parse(await getUserCurrent());
+      setCurrentUser(me);
+    } catch (error) {
+      console.log("Error fetching current user: ", error);
+    }
+  };
 
   useEffect(() => {
-    if (selectedUsers.length >= 2) {
+    // Kiểm tra số lượng bạn bè được chọn để quyết định hiển thị nút tạo nhóm
+    if (selectedFriends.length >= 2) {
       setShowCreateGroupButton(true);
     } else {
       setShowCreateGroupButton(false);
     }
-  }, [selectedUsers]);
+  }, [selectedFriends]);
 
+  //TODO: xu ly chon anh
   const handleImageSelect = (imageUri) => {
-    setGroupAvatar(imageUri);
+    setImage(imageUri); // Cập nhật đường dẫn của hình ảnh được chọn
   };
+
+  const handleFriendSelect = (friendId) => {
+    // Kiểm tra xem bạn đã được chọn chưa
+    const isSelected = selectedFriends.includes(friendId);
+    if (isSelected) {
+      // Xóa bạn nếu đã được chọn
+      setSelectedFriends(selectedFriends.filter((id) => id !== friendId));
+    } else {
+      // Thêm bạn vào danh sách đã chọn nếu chưa được chọn
+      setSelectedFriends([...selectedFriends, friendId]);
+    }
+  };
+
+  // Lọc danh sách bạn bè theo tên
+  // const filteredFriends = friends.filter((friend) =>
+  //   friend.name.toLowerCase().includes(textSearch.toLowerCase())
+  // );
 
   const handleCreateGroup = async () => {
     const newGroup = {
-      name: groupName,
-      avatar: groupAvatar,
-      ownerId: currentUser?.user?.id,
-      member: [...selectedUsers, currentUser?.user?.id],
+      name: nameGroup,
+      avatar:
+        "https://onthi1.s3.ap-southeast-1.amazonaws.com/1713240798265_1000076554.jpg",
+      ownerId: currentUser.id,
+      member: [...selectedFriends, currentUser.id],
     };
 
     try {
       const res = await chatGroupAPI.createGroup(newGroup);
       if (res?.data) {
+        console.log("Create group successfully: ", res?.data);
+        // chuyeern den trang home
         ToastAndroid.show(`Create group ${res?.data?.name} successfully`, 1000);
         navigation.navigate("Home");
       } else {
-        ToastAndroid.show(`Đã xảy ra lỗi khi tạo group`, ToastAndroid.SHORT);
+        console.log("Create group failed");
+        // toast.error("Create group failed");
       }
     } catch (error) {
-      console.log("Error occurred while create group:", error);
-      ToastAndroid.show(`Đã xảy ra lỗi khi tạo group`, ToastAndroid.SHORT);
+      console.log("error: ", error);
     }
   };
 
@@ -151,8 +168,8 @@ export default function CreateGroup({ navigation }) {
             width: "80%",
           }}
           placeholder="Đặt tên nhóm"
-          value={groupName}
-          onChangeText={(text) => setGroupName(text)}
+          value={nameGroup}
+          onChangeText={(text) => setNameGroup(text)}
         />
       </View>
 
@@ -203,7 +220,7 @@ export default function CreateGroup({ navigation }) {
             fontSize: 18,
           }}
         >
-          Đã chọn: {selectedUsers.length}
+          Đã chọn: {selectedFriends.length}
         </Text>
         <View
           style={{
@@ -220,16 +237,23 @@ export default function CreateGroup({ navigation }) {
         renderItem={({ item }) => (
           <Pressable onPress={() => handleFriendSelect(item.receiver.id)}>
             <View style={styles.friendContainer}>
-              <Image source={{ uri: item.receiver.avatar }} style={styles.avatar} />
+              <Image
+                source={{ uri: item.receiver.avatar }}
+                style={styles.avatar}
+              />
               <Text style={styles.name}>{item.receiver.username}</Text>
               <MaterialIcons
                 name={
-                  selectedUsers.some((id) => id === item.receiver.id)
+                  selectedFriends.some((id) => id === item.receiver.id)
                     ? "check-circle"
                     : "check-circle-outline"
                 }
                 size={24}
-                color={selectedUsers.some((id) => id === item.receiver.id) ? COLORS.blue : "gray"}
+                color={
+                  selectedFriends.some((id) => id === item.receiver.id)
+                    ? COLORS.blue
+                    : "gray"
+                }
               />
             </View>
           </Pressable>
@@ -238,7 +262,6 @@ export default function CreateGroup({ navigation }) {
       {/* Hiển thị nút tạo nhóm nếu có ít nhất 2 bạn bè được chọn */}
       {showCreateGroupButton && (
         <TouchableOpacity
-          disabled={loading}
           style={{
             backgroundColor: COLORS.blue,
             height: 48,
